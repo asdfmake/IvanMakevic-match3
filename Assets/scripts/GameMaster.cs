@@ -43,9 +43,10 @@ public class GameMaster : MonoBehaviour
 
     }
 
+
     // Update is called once per frame
     void Update()
     {
-        
+        //todo dodaj logiku za selektovani objekat, i objekat koji se nakon njega klikne, da li je match blabla
     }
 }
