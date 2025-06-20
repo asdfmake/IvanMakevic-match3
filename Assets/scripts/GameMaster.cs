@@ -128,6 +128,8 @@ public class GameMaster : MonoBehaviour
 
     IEnumerator DestroyAndDrop(List<Kocka> toDestroy)
     {
+        yield return new WaitForSeconds(.2f);
+
         foreach (Kocka k in toDestroy)
         {
             kocke[k.i, k.j] = null;
@@ -170,7 +172,7 @@ public class GameMaster : MonoBehaviour
             {
                 if (kocke[row, col] == null)
                 {
-                    Vector3 spawnPos = grid[row, col] + Vector3.up * 5f; // todo promeni vrednosti da izleda dobro
+                    Vector3 spawnPos = grid[row, col] + Vector3.up * 5f;
                     GameObject obj = Instantiate(testCube, spawnPos, Quaternion.identity);
                     Kocka novaKocka = obj.GetComponent<Kocka>();
                     novaKocka.SetCoordinates(row, col);
@@ -180,7 +182,7 @@ public class GameMaster : MonoBehaviour
             }
         }
 
-        yield return new WaitForSeconds(0.5f); // todo promeni vrednosti da izleda dobro 
+        yield return new WaitForSeconds(0.5f); 
 
         // proveri nove za match
         CheckMatch();
