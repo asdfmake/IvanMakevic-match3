@@ -9,7 +9,7 @@ public class Kocka : MonoBehaviour
     // MoveTo variables
     public float moveSpeed = 5f;
     private Vector3 targetPosition;
-    private bool isMoving = false;
+    public bool isMoving = false;
 
     void Start()
     {

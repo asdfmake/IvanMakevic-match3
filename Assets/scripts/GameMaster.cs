@@ -43,7 +43,7 @@ public class GameMaster : MonoBehaviour
         CheckMatch();
     }
 
-    void CheckMatch()
+    bool CheckMatch()
     {
         List<Kocka> toDestroy = new List<Kocka>();
         bool[,] alreadyMarked = new bool[6, 6];
@@ -67,7 +67,6 @@ public class GameMaster : MonoBehaviour
 
                 if (count >= 3)
                 {
-                    Debug.Log($"Match horizontal at ({i}, {j}) length {count}");
                     for (int x = 0; x < count; x++)
                     {
                         if (!alreadyMarked[i, j + x])
@@ -78,7 +77,7 @@ public class GameMaster : MonoBehaviour
                     }
                 }
 
-                j += count - 1; // presko?i ve? proverene
+                j += count - 1;
             }
         }
 
@@ -100,7 +99,6 @@ public class GameMaster : MonoBehaviour
 
                 if (count >= 3)
                 {
-                    Debug.Log($"Match vertical at ({i}, {j}) length {count}");
                     for (int x = 0; x < count; x++)
                     {
                         if (!alreadyMarked[i + x, j])
@@ -119,6 +117,9 @@ public class GameMaster : MonoBehaviour
         {
             StartCoroutine(DestroyAndDrop(toDestroy));
         }
+        Debug.Log(toDestroy.Count);
+
+        return toDestroy.Count > 0;
     }
 
     IEnumerator DestroyAndDrop(List<Kocka> toDestroy)
@@ -165,7 +166,7 @@ public class GameMaster : MonoBehaviour
             {
                 if (kocke[row, col] == null)
                 {
-                    Vector3 spawnPos = grid[row, col] + Vector3.up * 2f; // todo promeni vrednosti da izleda dobro
+                    Vector3 spawnPos = grid[row, col] + Vector3.up * 5f; // todo promeni vrednosti da izleda dobro
                     GameObject obj = Instantiate(testCube, spawnPos, Quaternion.identity);
                     Kocka novaKocka = obj.GetComponent<Kocka>();
                     novaKocka.SetCoordinates(row, col);
@@ -175,9 +176,9 @@ public class GameMaster : MonoBehaviour
             }
         }
 
-        yield return new WaitForSeconds(0.2f); // todo promeni vrednosti da izleda dobro 
+        yield return new WaitForSeconds(0.5f); // todo promeni vrednosti da izleda dobro 
 
-        // Automatski proveri nove za match
+        // proveri nove za match
         CheckMatch();
     }
 
@@ -198,23 +199,13 @@ public class GameMaster : MonoBehaviour
                 {
                     selected = noviSelected;
                 }
-                // else se odnosi na logiku poredjenja
+                // else se odnosi na logiku da li je moguace napraviti potez
                 else
                 {
                     // check da li se selected i novi selected nalaze jedno pored drugog
                     if (selected.GetComponent<Kocka>().NextTo(noviSelected))
                     {
-
-                        // check da li je boja ista
-                        if (selected.GetComponent<Kocka>().boja == noviSelected.GetComponent<Kocka>().boja)
-                        {
-                            Debug.Log("ista boja");
-                        }
-                        else
-                        {
-                            Debug.Log("nije ista boja");
-                        }
-
+                        StartCoroutine(ZameniIProveri(selected, noviSelected));
                     }
 
                     selected = null;
@@ -225,4 +216,53 @@ public class GameMaster : MonoBehaviour
             }
         }
     }
+
+    IEnumerator ZameniIProveri(GameObject a, GameObject b)
+    {
+        Kocka ka = a.GetComponent<Kocka>();
+        Kocka kb = b.GetComponent<Kocka>();
+
+        // originalne koordinate i pozicije
+        int ai = ka.i, aj = ka.j;
+        int bi = kb.i, bj = kb.j;
+
+        Vector3 posA = a.transform.position;
+        Vector3 posB = b.transform.position;
+
+        // menjanje vrednosti
+        ka.SetCoordinates(bi, bj);
+        kb.SetCoordinates(ai, aj);
+
+        kocke[ai, aj] = b;
+        kocke[bi, bj] = a;
+
+        ka.MoveTo(posB);
+        kb.MoveTo(posA);
+
+        // cekaj do se ne zavrsi pomeranje
+        yield return new WaitUntil(() => !kaIsMoving() && !kbIsMoving());
+
+
+        if (!CheckMatch())
+        {
+            // vracanje vrednosti na staro
+            ka.SetCoordinates(ai, aj);
+            kb.SetCoordinates(bi, bj);
+
+            kocke[ai, aj] = a;
+            kocke[bi, bj] = b;
+
+            ka.MoveTo(posA);
+            kb.MoveTo(posB);
+
+            yield return new WaitUntil(() => !kaIsMoving() && !kbIsMoving());
+        }
+
+        bool kaIsMoving() => ka.isMoving;
+        bool kbIsMoving() => kb.isMoving;
+    }
+
+
+
+
 }
