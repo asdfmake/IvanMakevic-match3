@@ -1,12 +1,14 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 
 public class GameMaster : MonoBehaviour
 {
     public GameObject testCube;
     public Vector3[,] grid = new Vector3[6, 6];
     public GameObject[,] kocke = new GameObject[6, 6];
+    public int score = 0;
 
     public GameObject selected;
 
@@ -116,8 +118,10 @@ public class GameMaster : MonoBehaviour
         if (toDestroy.Count > 0)
         {
             StartCoroutine(DestroyAndDrop(toDestroy));
+            score++;
+            GameObject.FindGameObjectWithTag("Finish").GetComponent<TextMeshProUGUI>().text = "Score: " + score;
+
         }
-        Debug.Log(toDestroy.Count);
 
         return toDestroy.Count > 0;
     }
